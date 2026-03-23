@@ -1,11 +1,11 @@
 import mongoose from "mongoose"
 
 const repoSchema=new mongoose.Schema({
-    user:{
+    userId:{
     type:mongoose.Schema.Types.ObjectId,
     ref:"User",
     },
-    name:{
+    repoName:{
         type:String,
         required:true,
     },
