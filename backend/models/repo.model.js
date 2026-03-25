@@ -13,12 +13,9 @@ const repoSchema=new mongoose.Schema({
         type:String,
         required:true,
     },
-    branch:{
-        type:String,
-        default:"main",
-    },
     defaultBranch:{
         type:String,
+        default:"main",
     },
     visibility:{
         type:String,

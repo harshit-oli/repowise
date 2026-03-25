@@ -16,7 +16,7 @@ export const sendOtp=async(req,res)=>{
             })
         }
         const otp=Math.floor(1000+Math.random()*9000).toString();
-        user.resetOtp=otp;
+        user.resetPassOtp=otp;
         user.otpExpires=Date.now() + 5*60*1000,
         user.isOtpVerified=false,
         await user.save();
@@ -72,7 +72,7 @@ export const register = async (req, res) => {
 
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         user.resetOtp = otp;
-        user.otpExpires = Date.now() + 5 * 60 * 1000;
+        user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
         await user.save();
 
         await sendMail(email, otp);
@@ -95,6 +95,10 @@ export const verifyRegisterOtp=async(req,res)=>{
         const {email,otp}=req.body;
 
         const user = await User.findOne({email});
+         console.log("Entered OTP:", otp);
+console.log("Stored OTP:", user.resetOtp);
+console.log("Expiry:", user.otpExpires);
+console.log("Now:", new Date());
         if(!user || user.resetOtp !== otp || user.otpExpires < Date.now()){
             return res.status(400).json({
              success:false,
@@ -103,7 +107,7 @@ export const verifyRegisterOtp=async(req,res)=>{
         }
         user.isVerified=true;
         user.resetOtp=undefined;
-        user.otpExpires=undefined;
+        user.otpExpires=undefined;  
 
         await user.save();
         const token=await genToken(user._id);
@@ -132,14 +136,14 @@ export const verifyResetOtp=async(req,res)=>{
         const {email,otp}=req.body;
 
         const user = await User.findOne({email});
-        if(!user || user.resetOtp !== otp || user.otpExpires < Date.now()){
+        if(!user || user.resetPassOtp !== otp || user.otpExpires < Date.now()){
             return res.status(400).json({
-             success:false,
+            success:false,
             message:"invalid or expired otp",
             })
         }
         user.isOtpVerified=true;
-        user.resetOtp=undefined;
+        user.resetPassOtp=undefined;
         user.otpExpires=undefined;
 
         await user.save();

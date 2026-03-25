@@ -19,6 +19,9 @@
         resetOtp:{
             type:String,
         },
+         resetPassOtp:{
+            type:String,
+        },
         otpExpires:{
             type:Date,
         },
@@ -51,7 +54,6 @@
             remainingCredits:Number,
             planType:String,
         },
-        isVerified:Boolean,
         refreshToken:String
     },{timestamps:true})
 
