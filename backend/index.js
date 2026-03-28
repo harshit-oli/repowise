@@ -5,6 +5,7 @@ import cors from "cors"
 import connectDb from "./db/db.js"
 import authRouter from "./routes/auth.routes.js"
 import repoRouter from "./routes/repo.routes.js"
+import AnalysisRouter from "./routes/Analysis.routes.js"
 
 dotenv.config();
 const PORT=process.env.PORT;
@@ -21,6 +22,7 @@ app.get("/",(req,res)=>{
 
 app.use("/api/auth",authRouter);
 app.use("/api/repo",repoRouter);
+app.use("/api/Analysis",AnalysisRouter);
 
 app.listen(PORT,()=>{
     connectDb();

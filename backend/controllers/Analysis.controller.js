@@ -133,3 +133,49 @@ const analysis = await Analysis.create({
     })
    }
 }   
+
+export const getAnalysis=async (req,res)=>{
+   try {
+     const {repoId}=req.params;
+    const analysisRepo=await Analysis.findOne({repoId});
+    if(!analysisRepo){
+      return res.status(400).json({
+        success:false,
+        message:"repo is not find",
+      })
+    }
+    return res.status(200).json({
+        success:true,
+        message:"analysis repo present here",
+        analysis:analysisRepo,
+    })
+   } catch (error) {
+    return res.status(500).json({
+        success: false,
+        message: "get analysis Server error",
+    })
+   }
+}
+
+export const getStatus=async(req, res)=>{
+  try {
+    const {repoId}=req.params;
+  const statusRepo=await Analysis.findById({repoId});
+    if(!statusRepo){
+      return res.status(400).json({
+        success:false,
+        message:"repo is not find",
+      })
+    }
+    return res.status(200).json({
+        success:true,
+        message:"status get successfully",
+        status:statusRepo.status,
+    })
+  } catch (error) {
+    return res.status(500).json({
+        success:false,
+        message:"status server error",
+    })
+  }
+}
