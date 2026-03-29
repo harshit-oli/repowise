@@ -28,7 +28,9 @@ export const addRepo=async(req, res)=>{
     const findUrlInfo=repoUrl.split("/");
     const owner = findUrlInfo[3];
     const repoName = findUrlInfo[4];
-    const octokit = new Octokit();
+    const octokit = new Octokit({
+        auth: process.env.GITHUB_TOKEN, 
+    });
 
     const {data} =await octokit.repos.get({
         owner,

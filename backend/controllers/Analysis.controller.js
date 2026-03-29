@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
-import Repo from "../models/repo.model";
+import Repo from "../models/repo.model.js";
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import Analysis from "../models/Analysis.model";
+import Analysis from "../models/Analysis.model.js";
 
 export const startAnalysis=async(req,res)=>{
     let findRepo
@@ -28,10 +28,13 @@ await findRepo.save()
   const findUrlInfo=findRepo.repoUrl.split("/");
    const owner = findUrlInfo[3];
 
-   const octokit = new Octokit();
+   const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN, 
+   });
+   
    const allFiles = [];
    const getAllFiles = async (path) => {  
-       const { data } = await octokit.repos.getContent({
+       const { data } = await octokit.repos.getContent({ 
         owner,
         repo: findRepo.repoName,
         path: path
@@ -110,9 +113,10 @@ const analysis = await Analysis.create({
     techStack: aiResult.techStack,
     complexity: aiResult.complexity,
     status: "completed",
-    token: result.usageMetadata.totalTokenCount,
+    token: result.usageMetadata?.totalTokenCount || 0,
 });
     findRepo.status = "completed";
+    findRepo.errorMessage = undefined;
     findRepo.lastAnalyzed = Date.now();
     await findRepo.save();
    return res.status(200).json({
@@ -122,6 +126,7 @@ const analysis = await Analysis.create({
    });
 
    } catch (error) {
+    console.log(error.message)
     if (findRepo) {
         findRepo.status = "failed";
         findRepo.errorMessage = error.message;
@@ -160,7 +165,7 @@ export const getAnalysis=async (req,res)=>{
 export const getStatus=async(req, res)=>{
   try {
     const {repoId}=req.params;
-  const statusRepo=await Analysis.findById({repoId});
+  const statusRepo=await Analysis.findOne({repoId});
     if(!statusRepo){
       return res.status(400).json({
         success:false,
