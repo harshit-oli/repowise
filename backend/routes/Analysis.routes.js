@@ -7,5 +7,4 @@ const AnalysisRouter=express.Router();
 AnalysisRouter.post("/startAnalysis/:repoId",isAuth,startAnalysis);
 AnalysisRouter.get("/getAnalysis/:repoId",isAuth,getAnalysis);
 AnalysisRouter.get("/getStatus/:repoId",isAuth,getStatus);
-
 export default AnalysisRouter;
