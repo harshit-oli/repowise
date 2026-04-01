@@ -21,6 +21,14 @@ const AiRequestSchema=new mongoose.Schema({
     cost:{
         type:Number,
     },
+    status: {
+    type: String,
+    enum: ["success", "failed"],
+    default: "success",
+    },
+    errorMessage: {
+    type: String,
+    },
     modelUsed:{
         type:String,
     },
