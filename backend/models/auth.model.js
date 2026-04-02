@@ -49,11 +49,21 @@
                 lastAnalyzed:Date,
             }
         ],
-        usage:{
-            totalRequests:Number,
-            remainingCredits:Number,
-            planType:String,
+        usage: {
+            totalRequests: { 
+              type: Number,
+              default: 0
+            },
+            remainingCredits:{ 
+                type: Number,
+             default: 10,
+            },
+            planType:{
+               type: String,
+               default: "free",
+             }
         },
+
         refreshToken:String
     },{timestamps:true})
 

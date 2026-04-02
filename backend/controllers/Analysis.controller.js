@@ -3,6 +3,7 @@ import Repo from "../models/repo.model.js";
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import Analysis from "../models/Analysis.model.js";
 import AiRequest from "../models/AIRequest.model.js";
+import User from "../models/auth.model.js";
 
     export const startAnalysis=async(req,res)=>{
         let findRepo
@@ -131,6 +132,12 @@ ${codeContext}
         complexity: aiResult.complexity,
         status: "completed",
         token: result.usageMetadata?.totalTokenCount || 0,
+    });
+    await User.findByIdAndUpdate(req.userId, {
+    $inc: {
+        "usage.totalRequests": 1,
+        "usage.remainingCredits": -1
+    }
     });
         findRepo.status = "completed";
         findRepo.errorMessage = undefined;
