@@ -105,3 +105,50 @@ export const generateFileSummaries=async(req,res)=>{
   }
    
 }
+
+export const getFileSummaries=async(req,res)=>{
+    try {
+    const {repoId}=req.params;
+    const files=await File.find({repoId});
+    if(!files){
+        return res.status(400).json({
+            success:false,
+            message:"repo not found",
+        })
+    }
+    return res.status(200).json({
+        success:true,
+        message:"FileSummaries found",
+        files,
+    })
+    } catch (error) {
+      return res.status(500).json({
+        success:false,
+        message:"FileSummaries server error",
+      })  
+    }
+}
+
+export const getFileById=async(req,res)=>{
+ try {
+     const {fileId}=req.params;
+    const singleFile=await File.findById(fileId);
+    if(!singleFile){
+        return res.status(400).json({
+            success:false,
+            message:"repo not found",
+        })
+    }
+        return res.status(200).json({
+        success:true,
+        message:"singleFilesummaries found",
+        singleFile,
+    })
+
+ } catch (error) {
+    return res.status(500).json({
+        success:false,
+        message:"singleFile server error",
+    })
+ }
+} 
