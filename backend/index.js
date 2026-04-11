@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.routes.js"
 import repoRouter from "./routes/repo.routes.js"
 import AnalysisRouter from "./routes/Analysis.routes.js"
 import AiRequestRouter from "./routes/AiRequest.routes.js"
+import fileRouter from "./routes/file.routes.js"
 
 dotenv.config();
 const PORT=process.env.PORT;
@@ -25,6 +26,7 @@ app.use("/api/auth",authRouter);
 app.use("/api/repo",repoRouter);
 app.use("/api/Analysis",AnalysisRouter);
 app.use("/api/AiRequest",AiRequestRouter);
+app.use("/api/file",fileRouter);
 
 
 app.listen(PORT,()=>{
