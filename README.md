@@ -1,1 +1,1 @@
-THIS IS MY PROJECT
+RepoWise AI ek intelligent developer tool hai jo kisi bhi GitHub repository ko deeply analyze karke uska human-readable explanation, architecture, dependency graph, security insights aur documentation generate karta hai.
