@@ -5,7 +5,7 @@ const genToken=async(userId)=>{
         const token=jwt.sign({userId},process.env.JWT_SECRET,{expiresIn:process.env.EXPIRE_TIME})
         return token
     } catch (error) {
-        return resizeBy.status(500).json(`gen token error ${error}`);
+        return res.status(500).json(`gen token error ${error}`);
     }
 }
 

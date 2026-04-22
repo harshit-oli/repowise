@@ -1,34 +1,31 @@
-import nodemailer from "nodemailer"
-import dotenv from "dotenv"
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 dotenv.config();
 const transporter = nodemailer.createTransport({
-    host: process.env.GMAIL_HOST,
-    port: Number(process.env.GMAIL_PORT),
-    secure: true, // true for port 465, false for other ports
-    auth: {
-      user: process.env.GMAIL_SENDERMAIL,
-      pass: process.env.GMAIL_PASSWORD,
-    },
-  });
-  const sendMail=async(to,otp)=>{
+  host: process.env.GMAIL_HOST,
+  port: Number(process.env.GMAIL_PORT),
+  secure: true, // true for port 465, false for other ports
+  auth: {
+    user: process.env.GMAIL_SENDERMAIL,
+    pass: process.env.GMAIL_PASSWORD,
+  },
+});
+const sendMail = async (to, otp) => {
+  console.log("➡️ sendMail called");
+  try {
     await transporter.sendMail({
-    from: process.env.GMAIL_SENDERMAIL,
-    to,
-    subject: "Reset Your Password",
-    text: `Please click on this link to verify :
+      from: process.env.GMAIL_SENDERMAIL,
+      to,
+      subject: "Reset Your Password",
+      text: `Please click on this link to verify :
      ${otp} is your otp for rest the password and it will expires in 5 minutes`,
     });
+  } catch (error) {
+    console.log("❌ Mail error:", error);
   }
+};
 
-  export default sendMail;
-
-
-
-
-
-
-
-
+export default sendMail;
 
 //    ctua jbek rjia ywee
