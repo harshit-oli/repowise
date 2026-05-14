@@ -16,25 +16,123 @@ const embeddingModel = genAI.getGenerativeModel({
 
 async function embedQuery(text) {
   const result = await embeddingModel.embedContent(text);
+
   return result.embedding.values.slice(0, 768);
 }
 
-const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
-const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX_NAME);
-async function chatting(question, repo) {
-  const queryVector = await embedQuery(question);
+const pinecone = new Pinecone({
+  apiKey: process.env.PINECONE_API_KEY,
+});
 
-  const searchResults = await pineconeIndex.query({
-    topK: 20,
-    vector: queryVector,
-    includeMetadata: true,
-    filter: { repoId: { $eq: repo } },
+const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX_NAME);
+
+async function generateQueries(question) {
+  const model = new ChatGoogleGenerativeAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    model: "gemini-2.5-flash",
+    temperature: 0.3,
   });
-  const context = searchResults.matches
+
+  const prompt = PromptTemplate.fromTemplate(`
+You are a helpful assistant for a GitHub repository search engine.
+
+Given a user's question about code, generate 3 semantically similar search queries.
+
+Question:
+{question}
+
+Instructions:
+- Fix any typos or spelling mistakes in the question first
+- Keep queries concise and specific to code/files
+- Maintain the same meaning
+- Return ONLY the 3 queries, one per line, no numbering, no extra text
+`);
+
+  const chain = RunnableSequence.from([
+    prompt,
+    model,
+    new StringOutputParser(),
+  ]);
+
+  const result = await chain.invoke({
+    question,
+  });
+
+  return [
+    question,
+    ...result
+      .split("\n")
+      .map((q) => q.replace(/^\d+\.\s*/, "").trim())
+      .filter(Boolean),
+  ];
+}
+
+async function chatting(question, repo) {
+  // STEP 1 → Generate multiple queries
+
+  const queries = await generateQueries(question);
+
+  // STEP 2 → Create embeddings
+
+  const queryVectors = await Promise.all(queries.map((q) => embedQuery(q)));
+
+  // STEP 3 → Parallel Pinecone retrieval
+
+  const searchResults = await Promise.all(
+    queryVectors.map((vector) =>
+      pineconeIndex.query({
+        topK: 10,
+        vector,
+        includeMetadata: true,
+
+        // IMPORTANT
+        filter: {
+          repoId: { $eq: repo },
+        },
+      }),
+    ),
+  );
+
+  // STEP 4 → Merge all matches
+
+  const allMatches = searchResults.flatMap((r) => r.matches);
+  if (!allMatches.length) {
+    return {
+      answer: "No relevant context found.",
+      context: "",
+    };
+  }
+  // STEP 5 → Score Fusion
+
+  const scoreMap = new Map();
+
+  for (const m of allMatches) {
+    const id = m.id || m._id;
+
+    const score = m.score ?? 0;
+
+    scoreMap.set(id, {
+      ...m,
+
+      score: (scoreMap.get(id)?.score || 0) + score,
+    });
+  }
+
+  // STEP 6 → Sort by best score
+
+  const uniqueDocs = Array.from(scoreMap.values()).sort(
+    (a, b) => b.score - a.score,
+  );
+
+  // STEP 7 → Create context
+
+  const context = uniqueDocs
+    .slice(0, 5)
     .map((match) => match.metadata.text)
     .join("\n\n---\n\n");
 
-  // then result lane ke baad query + top10 result LLM ko denge
+  // STEP 8 → Final LLM Answer
+
   const model = new ChatGoogleGenerativeAI({
     apiKey: process.env.GEMINI_API_KEY,
     model: "gemini-2.5-flash",
@@ -42,23 +140,24 @@ async function chatting(question, repo) {
   });
 
   const promptTemplate = PromptTemplate.fromTemplate(`
-You are an expert code assistant helping developers 
-understand a GitHub repository. Answer questions about 
-the codebase based on the provided code context.
+You are an expert code assistant helping developers
+understand a GitHub repository.
 
-Context from the documentation:
+Context from the codebase:
 {context}
 
-Question: {question}
+Developer's Question:
+{question}
 
 Instructions:
-- Answer the question using ONLY the information from the context above
-- If the answer is not in the context, say "I don't have enough information to answer that question."
+- Answer using ONLY the provided context
+- If answer not found say: "I don't have enough information about this."
 - Be concise and clear
-- Use code examples from the context if relevant
+- Use code examples from context if relevant
+- Mention file names when referencing code
 
 Answer:
-        `);
+`);
 
   const chain = RunnableSequence.from([
     promptTemplate,
@@ -66,12 +165,15 @@ Answer:
     new StringOutputParser(),
   ]);
 
-  // Step 6: Invoke the chain and get the answer
   const answer = await chain.invoke({
-    context: context,
-    question: question,
+    context,
+    question,
   });
-  return { answer, context };
+
+  return {
+    answer,
+    context,
+  };
 }
 
 export const sendMessage = async (req, res) => {
