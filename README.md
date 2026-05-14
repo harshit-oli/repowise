@@ -91,7 +91,7 @@ Instead of spending hours reading code — just paste the GitHub URL and get:
 ### AI & Vector
 | Technology | Use |
 |-----------|-----|
-| Gemini 2.0 Flash | AI analysis, file summaries, security scan |
+| Gemini 2.5 Flash | AI analysis, file summaries, security scan |
 | Gemini Embedding Model | Convert file content to 768-dim vectors |
 | Pinecone | Vector database for semantic search |
 | RAG Pipeline | Retrieval Augmented Generation for chat |
@@ -234,10 +234,3 @@ npm run dev
 
 **Harshit** — Building RepoWise AI solo as a full-stack AI project.
 
-> *"Maine ye project isliye banaya kyunki main khud naye codebases samajhne mein bahut time waste karta tha."*
-
----
-
-## 📄 License
-
-MIT License — feel free to use and contribute!
