@@ -11,6 +11,7 @@ import fileRouter from "./routes/file.routes.js";
 import dependencyRouter from "./routes/dependency.routes.js";
 import chatRouter from "./routes/chat.routes.js";
 import commitHistoryRouter from "./routes/commitHistory.routes.js";
+import securityRouter from "./routes/security.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -38,6 +39,7 @@ app.use("/api/file", fileRouter);
 app.use("/api/dependency", dependencyRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/commits", commitHistoryRouter);
+app.use("/api/security", securityRouter);
 
 app.listen(PORT, () => {
   connectDb();
