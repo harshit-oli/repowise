@@ -24,6 +24,14 @@ import User from "../models/auth.model.js";
         })
     }
 
+    const user = await User.findById(req.userId);
+    if(user.usage.remainingCredits <= 0){
+        return res.status(403).json({
+            success: false,
+            message: "Credits exhausted, please upgrade to Pro plan",
+        })
+    }
+
     findRepo.status = "processing"
     await findRepo.save()
 
