@@ -3,6 +3,7 @@ import User from "../models/auth.model.js";
 import genToken from "../config/token.js";
 import sendMail from "../config/Mail.js";
 import jwt from "jsonwebtoken";
+import passport from "passport";
 
 export const sendOtp = async (req, res) => {
   try {
@@ -263,7 +264,7 @@ export const getProfile = async (req, res) => {
         message: "user not found",
       });
     }
-    const user = await User.findById(userId).select("-password");
+    const user = await User.findById(userId).select("-password -githubAccessToken");
     return res.status(200).json({
       success: true,
       message: "profile find successfully",
@@ -345,4 +346,31 @@ export const againOtp = async (req, res) => {
       message: "Server error",
     });
   }
+};
+
+export const githubLogin = passport.authenticate("github", {
+  scope: ["user:email"],
+});
+
+export const githubCallback = async (req, res) => {
+  if (!req.user) {
+    return res.redirect("http://localhost:5173/login");
+  }
+  const token = await genToken(req.user._id);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+  res.redirect("http://localhost:5173/");
+};
+
+export const connectGithub = async (req, res) => {
+  const userId = req.session.userId; // session se userId lo
+  await User.findByIdAndUpdate(userId, {
+    githubId: req.user.githubId,
+    githubAccessToken: req.user.githubAccessToken,
+    githubUserName: req.user.githubUserName,
+  });
+  res.redirect("http://localhost:5173/");
 };

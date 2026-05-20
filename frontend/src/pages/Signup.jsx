@@ -28,6 +28,10 @@ const Signup = () => {
         // setLoading(false);
        }
     }
+
+    const gitSignUp=async()=>{
+      window.location.href = "http://localhost:8000/api/auth/github"
+    }
   return (
    <div className='w-full h-screen flex flex-col justify-center items-center bg-gradient-to-b 
     from-black to-gray-900'>
@@ -40,9 +44,9 @@ const Signup = () => {
       <div className='text-gray-500'>Start analyzing repos for free</div>
     </div>
     <div className='flex flex-col items-center justify-center gap-2'>
-      <div className='bg-black text-white px-4 py-2 rounded-lg cursor-pointer'>
+      <button className='bg-black text-white px-4 py-2 rounded-lg cursor-pointer' onClick={gitSignUp}>
         Sign Up with Github
-      </div>
+      </button>
       <div className='text-gray-400'>or with email</div>
     </div>
 

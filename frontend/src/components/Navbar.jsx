@@ -32,7 +32,7 @@ const Navbar = () => {
             <NavLink to="/dashboard"><li>Dashboard</li></NavLink>
             <li><button onClick={handleLogout} className='cursor-pointer'>Logout</button></li>
            </ul>
-         <div className=' gap-3 text-gray-300 text-[20px] md:hidden'>
+         <div className='gap-3 text-gray-300 text-[20px] md:hidden'>
             <button>click</button>
          </div>
       </div>

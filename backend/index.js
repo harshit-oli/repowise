@@ -12,6 +12,8 @@ import dependencyRouter from "./routes/dependency.routes.js";
 import chatRouter from "./routes/chat.routes.js";
 import commitHistoryRouter from "./routes/commitHistory.routes.js";
 import securityRouter from "./routes/security.routes.js";
+import passport from "./config/passport.js";
+import session from "express-session";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -27,6 +29,15 @@ app.use(
     credentials: true,
   }),
 );
+app.use(
+  session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
 app.get("/", (req, res) => {
   res.send("hii kaise ho");
 });

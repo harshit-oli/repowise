@@ -6,6 +6,7 @@ import VerifyEmail from './components/VerifyEmail'
 import { useSelector } from 'react-redux'
 import Home from './pages/Home'
 import GetCurrentUser from './hooks/GetCurrentUser'
+import Dashboard from './assets/Dashboard'
 
 export const serverUrl = "http://localhost:8000"
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
          <Route path="/verifyEmail" element={!userData ? <VerifyEmail/> : <Navigate to={"/"} />}></Route>
          <Route path='/login' element={!userData ? <Login/> : <Navigate to={"/"} />}/>
           <Route path='/' element={userData ? <Home/> : <Navigate to={"/login"} />} />
+          <Route path='/dashboard' element={userData ? <Dashboard/> : <Navigate to={"/login"} />} />
       </Routes>
     </div>
   )
