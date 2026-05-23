@@ -22,7 +22,7 @@ const Navbar = () => {
                  }
      }
   return (
-  <div className='flex justify-between items-center px-5 h-18 bg-gray-500 border-b border-gray-300'>
+  <div className='flex justify-between items-center px-5 h-18 bg-gray-500 border-b border-gray-300 sticky top-0 z-0'>
       <div className='flex max-w-[40%]'>
         <div className='font-bold text-3xl'><span className='text-gray-300'>Git</span><span className='text-gray-700'>Mind</span></div>
       </div>

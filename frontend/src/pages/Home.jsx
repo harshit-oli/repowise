@@ -4,7 +4,7 @@ import Main from '../components/Main'
 
 const Home = () => {
   return (
-    <div className='bg-gray-800 w-[100vw] h-[100vh]'>
+    <div className='bg-gray-800 max-w-[100vw] pb-10'>
       <Navbar/>
       <Main/>
     </div>
