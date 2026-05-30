@@ -40,9 +40,9 @@ useEffect(() => {
     </button>
   </div>
     </div>
-  <div className='flex flex-col mt-[30px] w-[100%] md:w-[80%]' >
+  <div className='flex flex-col mt-[30px] w-[100%] sm:w-[80%]' >
   <div className='bg-white/20 h-[1.5px]'></div>
-  <div className='h-[150px] flex gap-1.5 md:justify-around items-center text-center'>
+  <div className='h-[150px] flex gap-1.5 justify-around items-center text-center'>
   <div>
       <h2 className='text-white font-bold text-[15px] md:text-3xl'>{stats?.totalRepos ?? 0}+</h2>
       <p className='text-white/70 font-bold text-[12px] md:text-xl pt-1'>Repo Analysed</p>
@@ -212,8 +212,6 @@ useEffect(() => {
       </p>
     </div>
    <div className="flex flex-col md:flex-row w-full">
-
-  {/* LEFT SIDEBAR */}
   <div className="w-full md:w-[280px] border-b md:border-b-0 md:border-r border-zinc-800 p-4 md:p-6">
 
     {/* MOBILE */}
@@ -240,8 +238,6 @@ useEffect(() => {
       </button>
 
     </div>
-
-    {/* DESKTOP */}
     <div className="hidden md:flex flex-col gap-4">
 
       <button className="bg-zinc-200 text-black px-4 py-3 rounded-xl text-left font-medium">

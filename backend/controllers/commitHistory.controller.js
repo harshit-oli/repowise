@@ -46,11 +46,15 @@ export const fetchHistory = async (req, res) => {
         author: commit.commit.author.name,
         date: commit.commit.author.date,
         filesChanged: commitDetail.files.map((f) => f.filename),
-       diff: commitDetail.files
-       .filter(f => !f.filename.includes('node_modules') && !f.filename.includes('package-lock'))
-       .map(f => f.patch || '')
-       .join("\n\n")
-       });
+        diff: commitDetail.files
+          .filter(
+            (f) =>
+              !f.filename.includes("node_modules") &&
+              !f.filename.includes("package-lock"),
+          )
+          .map((f) => f.patch || "")
+          .join("\n\n"),
+      });
     }
 
     const fetchedHistory = await CommitHistory.create({
@@ -62,7 +66,7 @@ export const fetchHistory = async (req, res) => {
       success: true,
       message: "history fetched successfully",
       fetchedHistory,
-    }); 
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -171,8 +175,8 @@ Provide a clear, concise analysis.
 
 export const timeMachineQuery = async (req, res) => {
   try {
-    const {question} = req.body;
-    const {repoId} = req.params;
+    const { question } = req.body;
+    const { repoId } = req.params;
     const history = await CommitHistory.findOne({ repoId });
     if (!history) {
       return res.status(404).json({

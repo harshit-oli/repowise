@@ -28,12 +28,12 @@ const SecurityScanSchema = new mongoose.Schema(
         suggestion: {
           type: String,
         },
-        codeSnippet: { 
-          type: String 
+        codeSnippet: {
+          type: String,
         },
-        fixedCode: { 
-          type: String
-        }, 
+        fixedCode: {
+          type: String,
+        },
       },
     ],
     severity: {

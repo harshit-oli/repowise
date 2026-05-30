@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { setUserData } from '../redux/userSlice';
+import { setLoading, setUserData } from '../redux/userSlice';
 import axios from 'axios';
 import { serverUrl } from '../App';
 
@@ -14,9 +14,12 @@ const GetCurrentUser = () => {
     } catch (error) {
       console.log(error);
     }
+    finally {
+      dispatch(setLoading(false));
+    }
     }
     fetchUser();
-   },[])
+   },[dispatch]) 
 
 }
 
