@@ -7,6 +7,6 @@ const repoRouter=express.Router();
 repoRouter.post("/addRepo",isAuth,addRepo);
 repoRouter.get("/getRepos",isAuth,getRepos);
 repoRouter.get("/getRepo/:repoId",isAuth,getRepoById);
-repoRouter.get("/delete/:repoId",isAuth,deleteRepo);
+repoRouter.delete("/delete/:repoId",isAuth,deleteRepo);
 
 export default repoRouter;

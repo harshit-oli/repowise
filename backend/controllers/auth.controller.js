@@ -264,7 +264,9 @@ export const getProfile = async (req, res) => {
         message: "user not found",
       });
     }
-    const user = await User.findById(userId).select("-password -githubAccessToken");
+    const user = await User.findById(userId).select(
+      "-password -githubAccessToken",
+    );
     return res.status(200).json({
       success: true,
       message: "profile find successfully",
@@ -372,5 +374,7 @@ export const connectGithub = async (req, res) => {
     githubAccessToken: req.user.githubAccessToken,
     githubUserName: req.user.githubUserName,
   });
-  res.redirect("http://localhost:5173/");
+  console.log("req.user:", req.user);
+  console.log("session userId:", req.session.userId);
+  res.redirect("http://localhost:5173/addrepo");
 };

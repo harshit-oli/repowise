@@ -18,7 +18,10 @@ export const startScan = async (req, res) => {
         message: "repo not found",
       });
     }
+    console.log("repoId:", repoId);
+    console.log("userId:", req.userId);
     const files = await File.find({ repoId, userId });
+    console.log("files found:", files.length);
     const filteredFiles = files.filter((file) => {
       const ext = "." + file.fileName.split(".").pop().toLowerCase();
       return [".js", ".ts", ".jsx", ".tsx", ".py"].includes(ext);

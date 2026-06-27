@@ -5,15 +5,18 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Conversation from "../models/conversation.model.js";
 import Chat from "../models/chat.model.js";
 import Repo from "../models/repo.model.js";
+import User from "../models/auth.model.js";
+import AiRequest from "../models/AIRequest.model.js";
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const embeddingModel = genAI.getGenerativeModel({
   model: "models/gemini-embedding-001",
 });
-
+0
 async function embedQuery(text) {
   const result = await embeddingModel.embedContent(text);
 
@@ -68,15 +71,9 @@ Instructions:
 }
 
 async function chatting(question, repo) {
-  // STEP 1 → Generate multiple queries
-
   const queries = await generateQueries(question);
 
-  // STEP 2 → Create embeddings
-
   const queryVectors = await Promise.all(queries.map((q) => embedQuery(q)));
-
-  // STEP 3 → Parallel Pinecone retrieval
 
   const searchResults = await Promise.all(
     queryVectors.map((vector) =>
@@ -84,16 +81,12 @@ async function chatting(question, repo) {
         topK: 10,
         vector,
         includeMetadata: true,
-
-        // IMPORTANT
         filter: {
           repoId: { $eq: repo },
         },
       }),
     ),
   );
-
-  // STEP 4 → Merge all matches
 
   const allMatches = searchResults.flatMap((r) => r.matches);
   if (!allMatches.length) {
@@ -102,7 +95,6 @@ async function chatting(question, repo) {
       context: "",
     };
   }
-  // STEP 5 → Score Fusion
 
   const scoreMap = new Map();
 
@@ -124,14 +116,10 @@ async function chatting(question, repo) {
     (a, b) => b.score - a.score,
   );
 
-  // STEP 7 → Create context
-
   const context = uniqueDocs
     .slice(0, 5)
     .map((match) => match.metadata.text)
     .join("\n\n---\n\n");
-
-  // STEP 8 → Final LLM Answer
 
   const model = new ChatGoogleGenerativeAI({
     apiKey: process.env.GEMINI_API_KEY,
@@ -179,21 +167,47 @@ Answer:
 export const sendMessage = async (req, res) => {
   try {
     const { repoId } = req.params;
-    const { content } = req.body;
+    const { content, conversationId } = req.body;
+    const user = await User.findById(req.userId);
+    if (user.usage.remainingCredits <= 0) {
+      return res.status(403).json({
+        success: false,
+        message: "Credits exhausted, please upgrade to Pro plan",
+      });
+    }
     const { answer, context } = await chatting(content, repoId);
 
     await Chat.create({
       userId: req.userId,
       repoId,
       role: "User",
+      conversationId,
       content: content,
       context: context,
     });
     await Chat.create({
       userId: req.userId,
       repoId,
+      conversationId,
       role: "Assistant",
       content: answer,
+    });
+    await AiRequest.create({
+      userId: req.userId,
+      repoId,
+      prompt: content,
+      response: answer,
+      tokenUsed: 0,
+      status: "success",
+      featureType: "chat",
+      modelUsed: "gemini-2.5-flash",
+    });
+
+    await User.findByIdAndUpdate(req.userId, {
+      $inc: {
+        "usage.totalRequests": 1,
+        "usage.remainingCredits": -1,
+      },
     });
 
     return res.status(200).json({
@@ -204,6 +218,7 @@ export const sendMessage = async (req, res) => {
       context: context,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "sendMessage server error",
@@ -213,7 +228,7 @@ export const sendMessage = async (req, res) => {
 
 export const getChatHistory = async (req, res) => {
   try {
-    const { repoId } = req.params;
+    const { repoId, conversationId } = req.params;
     const repo = await Repo.findById(repoId);
     if (!repo) {
       return res.status(404).json({
@@ -221,7 +236,9 @@ export const getChatHistory = async (req, res) => {
         message: "repo not found",
       });
     }
-    const chat = await Chat.find({ repoId }).sort({ createdAt: 1 });
+    const chat = await Chat.find({ repoId, conversationId }).sort({
+      createdAt: 1,
+    });
 
     return res.status(200).json({
       success: true,
@@ -238,7 +255,7 @@ export const getChatHistory = async (req, res) => {
 
 export const clearChat = async (req, res) => {
   try {
-    const { repoId } = req.params;
+    const { repoId, conversationId } = req.params;
     const repo = await Repo.findById(repoId);
     if (!repo) {
       return res.status(404).json({
@@ -253,7 +270,7 @@ export const clearChat = async (req, res) => {
       });
     }
 
-    await Chat.deleteMany({ repoId });
+    await Chat.deleteMany({ repoId, conversationId });
     return res.status(200).json({
       success: true,
       message: "all chat deleted",
@@ -263,5 +280,84 @@ export const clearChat = async (req, res) => {
       success: false,
       message: "clear Chat server error",
     });
+  }
+};
+export const createConversation = async (req, res) => {
+  try {
+    const { repoId } = req.params;
+    const { title } = req.body;
+
+    const repo = await Repo.findById(repoId);
+    if (!repo) {
+      return res
+        .status(404)
+        .json({ success: false, message: "repo not found" });
+    }
+
+    const conversation = await Conversation.create({
+      repoId,
+      userId: req.userId,
+      title: title || "New Chat",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "conversation created",
+      conversation,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "createConversation server error" });
+  }
+};
+
+export const getConversations = async (req, res) => {
+  try {
+    const { repoId } = req.params;
+
+    const conversations = await Conversation.find({
+      repoId,
+      userId: req.userId,
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "conversations found",
+      conversations,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "getConversations server error" });
+  }
+};
+
+export const deleteConversation = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res
+        .status(404)
+        .json({ success: false, message: "conversation not found" });
+    }
+
+    if (conversation.userId.toString() !== req.userId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    await Conversation.findByIdAndDelete(conversationId);
+    await Chat.deleteMany({ conversationId }); // related chats bhi delete
+
+    return res.status(200).json({
+      success: true,
+      message: "conversation deleted",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "deleteConversation server error" });
   }
 };

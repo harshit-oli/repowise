@@ -15,6 +15,7 @@ import securityRouter from "./routes/security.routes.js";
 import passport from "./config/passport.js";
 import session from "express-session";
 import statsRouter from "./routes/getStats.routes.js";
+import refectorRouter from "./routes/refector.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -53,6 +54,7 @@ app.use("/api/chat", chatRouter);
 app.use("/api/commits", commitHistoryRouter);
 app.use("/api/security", securityRouter);
 app.use("/api/stats", statsRouter);
+app.use("/api/refactor", refectorRouter);
 
 app.listen(PORT, () => {
   connectDb();

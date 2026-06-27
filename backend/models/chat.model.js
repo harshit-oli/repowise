@@ -24,6 +24,10 @@ const chatSchema = new mongoose.Schema({
   tokenUsed: {
     type: Number,
   },
+  conversationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Conversation"
+  }
 },{timestamps: true});
 
 const Chat = mongoose.model("Chat", chatSchema);

@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { PineconeStore } from "@langchain/pinecone";
+import User from "../models/auth.model.js";
 
 class GeminiEmbeddings {
   constructor(apiKey) {
@@ -77,8 +78,16 @@ export const generateFileSummaries = async (req, res) => {
     const findUrlInfo = findRepo.repoUrl.split("/");
     const owner = findUrlInfo[3];
 
+    const user = await User.findById(req.userId);
+    if (!user?.githubAccessToken) {
+      return res.status(401).json({
+        success: false,
+        message: "GitHub account not connected",
+      });
+    }
+
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: user.githubAccessToken,
     });
 
     const allFiles = [];
@@ -126,14 +135,14 @@ export const generateFileSummaries = async (req, res) => {
     }
     console.log("Total files to process:", fileContents.length);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     for (const file of fileContents) {
       const existingFile = await File.findOne({
         repoId,
         filePath: file.filePath,
       });
       console.log(file.fileName, existingFile ? "SKIP" : "PROCESS");
-      if (existingFile) continue;
+      if (existingFile?.summary) continue;
       const prompt = `
     You are a code analyzer.
     Analyze this file and return a 2-3 sentence summary of what it does.
@@ -146,15 +155,19 @@ export const generateFileSummaries = async (req, res) => {
       const result = await model.generateContent(prompt);
       const summary = result.response.text();
 
-      await File.create({
-        repoId,
-        userId: req.userId,
-        fileName: file.fileName,
-        filePath: file.filePath,
-        content: file.content,
-        summary,
-        size: file.content.length,
-      });
+      if (existingFile) {
+        await File.findByIdAndUpdate(existingFile._id, { summary });
+      } else {
+        await File.create({
+          repoId,
+          userId: req.userId,
+          fileName: file.fileName,
+          filePath: file.filePath,
+          content: file.content,
+          summary,
+          size: file.content.length,
+        });
+      }
       await new Promise((r) => setTimeout(r, 15000));
     }
 
@@ -164,6 +177,7 @@ export const generateFileSummaries = async (req, res) => {
       totalProcessed: fileContents.length,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "file server error",
@@ -225,41 +239,41 @@ export const getFileById = async (req, res) => {
   }
 };
 
-export const searchFiles = async (req, res) => {
-  try {
-    const { query } = req.body;
-    const { repoId } = req.params;
+  export const searchFiles = async (req, res) => {
+    try {
+      const { query } = req.body;
+      const { repoId } = req.params;
 
-    if (!query) {
-      return res.status(403).json({
+      if (!query) {
+        return res.status(403).json({
+          success: false,
+          message: "query not found",
+        });
+      }
+      const files = await File.find({
+        repoId,
+        $or: [
+          { fileName: { $regex: query, $options: "i" } },
+          { summary: { $regex: query, $options: "i" } },
+        ],
+      });
+      if (files.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No files found",
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        files,
+      });
+    } catch (error) {
+      return res.status(500).json({
         success: false,
-        message: "query not found",
+        message: "searchFile server error",
       });
     }
-    const files = await File.find({
-      repoId,
-      $or: [
-        { fileName: { $regex: query, $options: "i" } },
-        { summary: { $regex: query, $options: "i" } },
-      ],
-    });
-    if (files.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No files found",
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      files,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "searchFile server error",
-    });
-  }
-};
+  };
 
 export const generateEmbeddings = async (req, res) => {
   try {

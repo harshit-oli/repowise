@@ -4,6 +4,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import Analysis from "../models/Analysis.model.js";
 import AiRequest from "../models/AIRequest.model.js";
 import User from "../models/auth.model.js";
+import File from "../models/file.model.js";
+import Security from "../models/SecurityScan.model.js";
 
 export const startAnalysis = async (req, res) => {
   let findRepo;
@@ -38,8 +40,15 @@ export const startAnalysis = async (req, res) => {
     const findUrlInfo = findRepo.repoUrl.split("/");
     const owner = findUrlInfo[3];
 
+    if (!user?.githubAccessToken) {
+      return res.status(401).json({
+        success: false,
+        message: "GitHub account not connected",
+      });
+    }
+
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: user.githubAccessToken,
     });
 
     const allFiles = [];
@@ -128,6 +137,16 @@ ${codeContext}
       featureType: "summary",
       modelUsed: "gemini-2.5-flash",
     });
+
+    await File.insertMany(
+      fileContents.map((file) => ({
+        repoId,
+        userId: req.userId,
+        fileName: file.fileName,
+        filePath: file.filePath,
+        content: file.content,
+      })),
+    );
 
     const analysis = await Analysis.create({
       repoId,
@@ -228,6 +247,8 @@ export const reAnalyze = async (req, res) => {
       });
     }
     await Analysis.findOneAndDelete({ repoId });
+    await File.deleteMany({ repoId });
+    await Security.deleteMany({ repoId });
 
     findRepo.status = "pending";
     await findRepo.save();

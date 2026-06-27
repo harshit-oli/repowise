@@ -4,10 +4,13 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
+import TimeMachine from "../models/timeMachineQuery.model.js";
 import Repo from "../models/repo.model.js";
 import { Octokit } from "@octokit/rest";
+import User from "../models/auth.model.js";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 
 export const fetchHistory = async (req, res) => {
   try {
@@ -22,8 +25,16 @@ export const fetchHistory = async (req, res) => {
     const findUrlInfo = repo.repoUrl.split("/");
     const owner = findUrlInfo[3];
 
+    const user = await User.findById(req.userId);
+    if (!user?.githubAccessToken) {
+      return res.status(401).json({
+        success: false,
+        message: "GitHub account not connected",
+      });
+    }
+
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: user.githubAccessToken,
     });
     const commits = [];
 
@@ -68,6 +79,7 @@ export const fetchHistory = async (req, res) => {
       fetchedHistory,
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({
       success: false,
       message: "fetchedHistory server error",
@@ -184,6 +196,13 @@ export const timeMachineQuery = async (req, res) => {
         message: "history not found",
       });
     }
+    const user = await User.findById(req.userId);
+    if (user.usage.remainingCredits <= 0) {
+      return res.status(403).json({
+        success: false,
+        message: "Credits exhausted, please upgrade to Pro plan",
+      });
+    }
     const allDiffs = history.commits
       .map((c) => `Date: ${c.date}\nMessage: ${c.message}\nDiff: ${c.diff}`)
       .join("\n\n---\n\n");
@@ -222,6 +241,18 @@ Answer:
       question,
       allDiffs,
     });
+    await TimeMachine.create({
+      repoId,
+      userId: req.userId,
+      question,
+      answer: result,
+    });
+    await User.findByIdAndUpdate(req.userId, {
+      $inc: {
+        "usage.totalRequests": 1,
+        "usage.remainingCredits": -1,
+      },
+    });
 
     return res.status(200).json({
       success: true,
@@ -233,5 +264,17 @@ Answer:
       success: false,
       message: "timeMachineQuery server error",
     });
+  }
+};
+
+export const getTimeMachineHistory = async (req, res) => {
+  try {
+    const { repoId } = req.params;
+    const history = await TimeMachine.find({ repoId, userId: req.userId }).sort(
+      { createdAt: 1 },
+    );
+    return res.status(200).json({ success: true, history });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "server error" });
   }
 };

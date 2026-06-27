@@ -3,6 +3,11 @@ import userSlice from "./userSlice";
 import securitySlice from "./securitySlice";
 import repoSlice from "./repoSlice";
 import commitSlice from "./commitSlice";
+import analysisSlice from "./analysis";
+import fileSlice from "./fileSlice";
+import dependencySlice from "./graphSlice";
+import chatSlice from "./chatSlice";
+import refactorSlice from "./refactorSlice";
 
 const store = configureStore({
   reducer: {
@@ -10,6 +15,11 @@ const store = configureStore({
     repo: repoSlice,
     security: securitySlice,
     commits: commitSlice,
+    analysis: analysisSlice,
+    file: fileSlice,
+    dependency: dependencySlice,
+    chat: chatSlice,
+    refactor: refactorSlice,
   },
 });
 

@@ -10,8 +10,15 @@ import GetCurrentUser from './hooks/GetCurrentUser'
 import Dashboard from './pages/Dashboard'
 import Navbar from './components/Navbar'
 import GetRepos from './hooks/GetRepos'
+import Repo from './pages/Repo'
+import RepoPage from './components/RepoPage'
+import FileIssue from './components/FileIssue'
+import AddRepo from './components/AddRepo'
+import FilePage from './components/FilePage'
+import CommitAnalysisPage from './components/CommitAnalysisPage'
 
 export const serverUrl = "http://localhost:8000"
+
 
 const App = () => {
   const {userData,loading}=useSelector(state=>state.user);
@@ -29,6 +36,12 @@ const App = () => {
           <Route path='/login' element={!userData ? <Login/> : <Navigate to={"/"} />}/>
           <Route path='/' element={userData ? <Home/> : <Navigate to={"/login"} />} />
           <Route path='/dashboard' element={userData ? <Dashboard/> : <Navigate to={"/login"} />} />
+          <Route path='/repos' element={userData ? <Repo/> : <Navigate to={"/login"} />} />
+          <Route path='/repos/:repoId' element={userData ? <RepoPage/> : <Navigate to={"/login"} />} />
+          <Route path='/issueFile/:repoId/:fileName' element={userData ? <FileIssue/> : <Navigate to={"/login"} />} />
+          <Route path='/addRepo' element={userData ? <AddRepo/> : <Navigate to={"/login"} />} />
+          <Route path='/repos/:repoId/file/:fileId' element={userData ? <FilePage/> : <Navigate to={"/login"} />} />
+          <Route path='/repos/:repoId/commit/:sha' element={userData ? <CommitAnalysisPage/> : <Navigate to={"/login"} />} />
         </Routes>
       )}
     </div>

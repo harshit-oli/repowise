@@ -22,24 +22,15 @@ const navItems = [
       { name: "Dashboard", icon: "⊞", route: "/dashboard" },
       { name: "Repos", icon: "⎇", route: "/repos" },
     ]},
-    { section: "Analysis", items: [
-      { name: "Analysis", icon: "⚙", route: "/analysis" },
-      { name: "Dependency graph", icon: "◎", route: "/dependency" },
-      { name: "File summaries", icon: "☰", route: "/files" },
-    ]},
-    { section: "Tools", items: [
-      { name: "Security scan", icon: "⛨", route: "/security" },
-      { name: "Chat with repo", icon: "◻", route: "/chat" },
-      { name: "Time machine", icon: "◷", route: "/timemachine" },
-      { name: "Refactor", icon: "⟳", route: "/refactor" },
-    ]},
     { section: "Team & Billing", items: [
       { name: "Team", icon: "◈", route: "/team" },
       { name: "Subscription", icon: "◇", route: "/subscription" },
     ]},
 ];
 
-  
+const handleAddRepo = () => {
+        navigate("/addrepo");
+}
   useEffect(() => {
       const fetchStats = async () => {
           const res = await axios.get(`${serverUrl}/api/stats`,{withCredentials:true});
@@ -111,7 +102,7 @@ const checkSeverity = (severity) => {
       </div>
       <div className="px-4 py-3 border-t border-gray-500">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-sm font-semibold text-gray-100">H</div>
+          <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-sm font-semibold text-gray-100">{userData.name.slice(0,1)}</div>
           <div>
             <div className="text-md font-semibold text-gray-800">{userData?.name}</div>
             <div className="text-sm text-gray-600">{userData?.usage?.planType}</div>
@@ -152,10 +143,10 @@ const checkSeverity = (severity) => {
             >☰</button>
             <div>
               <div className="text-lg md:text-xl font-bold text-slate-100">Dashboard</div>
-              <div className="text-sm text-slate-400 font-bold">Welcome back, Harshit</div>
+              <div className="text-sm text-slate-400 font-bold">Welcome back, {userData?.name}</div>
             </div>
           </div>
-          <button className="bg-gray-600 hover:bg-gray-500 text-slate-100 border-none rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm font-medium cursor-pointer transition-colors">
+          <button className="bg-gray-600 hover:bg-gray-500 text-slate-100 border-none rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm font-medium cursor-pointer transition-colors" onClick={()=>handleAddRepo()}>
             + Add repo
           </button>
         </div>
@@ -171,7 +162,7 @@ const checkSeverity = (severity) => {
        <div><h2 className='text-white font-bold text-[15px] md:text-3xl'>{stats?.securityStats?.[0]?.totalIssues ?? 0}+</h2>
         <p className='text-white/70 font-bold  text-[12px] md:text-xl pt-1'>Security issues found</p>
        </div>
-       <div><h2 className='text-white font-bold text-[15px] md:text-3xl'>{stats?.securityStats?.[0]?.avgScore ?? 0}%</h2>
+       <div><h2 className='text-white font-bold text-[15px] md:text-3xl'>{(stats?.securityStats?.[0]?.avgScore ?? 0).toFixed(2)}%</h2>
         <p className='text-white/70 font-bold md:text-xl text-[12px] pt-1'>Accuracy rate</p>
        </div>
        </div>
@@ -192,7 +183,7 @@ const checkSeverity = (severity) => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`text-md px-2 py-1 rounded-full font-medium hidden sm:inline ${repo.status=="completed" ? "bg-green-950 text-green-400" : "bg-slate-800 text-slate-400"}`}>{repo.status}</span>
-                  <button className="bg-transparent border border-gray-600 rounded-md px-3 py-2 text-md text-white cursor-pointer hover:text-slate-200 hover:border-gray-400 transition-colors">
+                  <button className="bg-transparent border border-gray-600 rounded-md px-3 py-2 text-md text-white cursor-pointer hover:text-slate-200 hover:border-gray-400 transition-colors" onClick={()=> repo.status  !== "completed" ? navigate("/analyse") : navigate(`/repos/${repo._id}`)}>
                     {repo.status === "completed" ? "View" : "Analyze"}
                   </button>
                 </div>
