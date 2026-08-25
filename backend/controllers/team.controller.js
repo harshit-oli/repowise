@@ -24,6 +24,9 @@ export const createTeam = async (req, res) => {
       inviteCode,
     });
     await User.findByIdAndUpdate(userId, { teamId: team._id });
+
+    await team.populate("members.userId");
+    await team.populate("ownerId");
     return res.status(200).json({
       success: true,
       message: "team created successfully",
