@@ -21,6 +21,7 @@ import teamRouter from "./routes/team.routes.js";
 dotenv.config();
 const PORT = process.env.PORT;
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -36,6 +37,11 @@ app.use(
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+    },
   }),
 );
 app.use(passport.initialize());
