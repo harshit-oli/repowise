@@ -30,7 +30,8 @@ const Signup = () => {
     }
 
     const gitSignUp=async()=>{
-      window.location.href = "http://localhost:8000/api/auth/github"
+      // window.location.href = "http://localhost:8000/api/auth/github"
+      window.location.href ="https://gitmind-backend-jt0o.onrender.com/api/auth/github";
     }
   return (
    <div className='w-full h-screen flex flex-col justify-center items-center bg-gradient-to-b 
