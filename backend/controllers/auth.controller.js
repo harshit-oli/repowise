@@ -377,5 +377,6 @@ export const connectGithub = async (req, res) => {
   });
   console.log("req.user:", req.user);
   console.log("session userId:", req.session.userId);
-  res.redirect("http://localhost:5173/addrepo");
+  // res.redirect("http://localhost:5173/addrepo");
+  res.redirect("https://repowise-six.vercel.app/addrepo");
 };
