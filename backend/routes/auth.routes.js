@@ -29,18 +29,20 @@ authRouter.post("/resetPassword", resetPassword);
 authRouter.get("/againOtp", isOtpValid, againOtp);
 authRouter.get("/github", githubLogin);
 authRouter.get("/github/callback", 
-    passport.authenticate("github", { failureRedirect: "http://localhost:5173/login"}),
+    // passport.authenticate("github", { failureRedirect: "http://localhost:5173/login"}),
+     passport.authenticate("github", { failureRedirect: "https://repowise-six.vercel.app/login"}),
     githubCallback
 );
 authRouter.get("/github/connect", isAuth,
     (req, res, next) => {
-        req.session.userId = req.userId 
+        req.session.userId = req.userId
         next()
     },
     passport.authenticate("github", { scope: ["user:email"] })
 );
 authRouter.get("/github/connect/callback",
-    passport.authenticate("github", { failureRedirect: "http://localhost:5173/login"}),
+    // passport.authenticate("github", { failureRedirect: "http://localhost:5173/login"}),
+    passport.authenticate("github", { failureRedirect: "https://repowise-six.vercel.app/login"}),
     connectGithub
 );
 

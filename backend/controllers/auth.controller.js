@@ -356,7 +356,8 @@ export const githubLogin = passport.authenticate("github", {
 
 export const githubCallback = async (req, res) => {
   if (!req.user) {
-    return res.redirect("http://localhost:5173/login");
+    // return res.redirect("http://localhost:5173/login");
+    return res.redirect("https://repowise-six.vercel.app/login");
   }
   const token = await genToken(req.user._id);
   res.cookie("token", token, {
@@ -364,7 +365,7 @@ export const githubCallback = async (req, res) => {
     secure: false,
     sameSite: "lax",
   });
-  res.redirect("http://localhost:5173/");
+  res.redirect("https://repowise-six.vercel.app/");
 };
 
 export const connectGithub = async (req, res) => {

@@ -18,7 +18,8 @@ import FilePage from './components/FilePage'
 import CommitAnalysisPage from './components/CommitAnalysisPage'
 import Team from './pages/Team'
 
-export const serverUrl = "http://localhost:8000"
+// export const serverUrl = "http://localhost:8000"
+export const serverUrl = "https://gitmind-backend-jt0o.onrender.com"
 
 
 const App = () => {
