@@ -28,7 +28,6 @@ const Navbar = () => {
       </div>
       <div className='max-w-[60%]'>
             <ul className='hidden md:flex gap-5 text-gray-300 text-[20px]'>
-            <NavLink to="/tokens"><li>Tokens</li></NavLink>
             <NavLink to="/dashboard"><li>Dashboard</li></NavLink>
             <li><button onClick={handleLogout} className='cursor-pointer'>Logout</button></li>
            </ul>

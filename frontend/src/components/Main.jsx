@@ -214,7 +214,6 @@ useEffect(() => {
    <div className="flex flex-col md:flex-row w-full">
   <div className="w-full md:w-[280px] border-b md:border-b-0 md:border-r border-zinc-800 p-4 md:p-6">
 
-    {/* MOBILE */}
     <div className="flex md:hidden gap-3 overflow-x-auto">
 
       <button className="bg-zinc-200 text-black px-4 py-2 rounded-xl whitespace-nowrap font-medium">

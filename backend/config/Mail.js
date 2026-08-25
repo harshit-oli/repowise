@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 const sendMail = async (to, otp) => {
-  console.log("➡️ sendMail called");
+  console.log(" sendMail called");
   try {
     await transporter.sendMail({
       from: process.env.GMAIL_SENDERMAIL,
@@ -22,7 +22,7 @@ const sendMail = async (to, otp) => {
      ${otp} is your otp for rest the password and it will expires in 5 minutes`,
     });
   } catch (error) {
-    console.log("❌ Mail error:", error);
+    console.log(" Mail error:", error);
   }
 };
 
