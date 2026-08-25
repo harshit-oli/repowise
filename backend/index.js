@@ -16,12 +16,11 @@ import passport from "./config/passport.js";
 import session from "express-session";
 import statsRouter from "./routes/getStats.routes.js";
 import refectorRouter from "./routes/refector.routes.js";
+import teamRouter from "./routes/team.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
-
 const app = express();
-
 app.use(express.json());
 app.use(cookieParser());
 
@@ -55,6 +54,7 @@ app.use("/api/commits", commitHistoryRouter);
 app.use("/api/security", securityRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/refactor", refectorRouter);
+app.use("/api/team", teamRouter);
 
 app.listen(PORT, () => {
   connectDb();

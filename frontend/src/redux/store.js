@@ -8,6 +8,7 @@ import fileSlice from "./fileSlice";
 import dependencySlice from "./graphSlice";
 import chatSlice from "./chatSlice";
 import refactorSlice from "./refactorSlice";
+import teamSlice from "./teamSlice";
 
 const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ const store = configureStore({
     dependency: dependencySlice,
     chat: chatSlice,
     refactor: refactorSlice,
+    team: teamSlice,
   },
 });
 

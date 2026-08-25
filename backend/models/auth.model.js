@@ -65,7 +65,11 @@ const authSchema = new mongoose.Schema(
         default: "Free",
       },
     },
-
+    teamId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
+      default: null,
+    },
     refreshToken: String,
   },
   { timestamps: true },

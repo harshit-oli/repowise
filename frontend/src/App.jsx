@@ -16,6 +16,7 @@ import FileIssue from './components/FileIssue'
 import AddRepo from './components/AddRepo'
 import FilePage from './components/FilePage'
 import CommitAnalysisPage from './components/CommitAnalysisPage'
+import Team from './pages/Team'
 
 export const serverUrl = "http://localhost:8000"
 
@@ -37,6 +38,7 @@ const App = () => {
           <Route path='/' element={userData ? <Home/> : <Navigate to={"/login"} />} />
           <Route path='/dashboard' element={userData ? <Dashboard/> : <Navigate to={"/login"} />} />
           <Route path='/repos' element={userData ? <Repo/> : <Navigate to={"/login"} />} />
+          <Route path='/team' element={userData ? <Team/> : <Navigate to={"/login"} />} />
           <Route path='/repos/:repoId' element={userData ? <RepoPage/> : <Navigate to={"/login"} />} />
           <Route path='/issueFile/:repoId/:fileName' element={userData ? <FileIssue/> : <Navigate to={"/login"} />} />
           <Route path='/addRepo' element={userData ? <AddRepo/> : <Navigate to={"/login"} />} />

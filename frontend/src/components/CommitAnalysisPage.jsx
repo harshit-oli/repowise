@@ -102,7 +102,6 @@ const CommitAnalysisPage = () => {
               <div className="h-3 bg-gray-800 rounded-full w-2/3 animate-pulse" />
             </div>
           )}
-
           {error && !loading && (
             <p className="text-sm text-red-400">{error}</p>
           )}
@@ -129,10 +128,8 @@ const CommitAnalysisPage = () => {
             )}
           </div>
         )}
-
       </div>
     </div>
   );
 };
-
 export default CommitAnalysisPage;
