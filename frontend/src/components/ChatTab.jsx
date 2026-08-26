@@ -125,7 +125,6 @@ const ChatTab = ({ repoId }) => {
       <div className="bg-gray-900 border border-gray-700 rounded-2xl p-4">
         <p className="text-sm font-semibold text-slate-300 mb-2">New chat</p>
         <input
-          autoFocus
           type="text"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
